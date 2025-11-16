@@ -6,6 +6,7 @@ using FreshDrink.Data;
 using FreshDrink.Data.Identity;
 using FreshDrink.Web.Data;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ----------------------- DATABASE -----------------------
@@ -37,14 +38,12 @@ builder.Services.ConfigureApplicationCookie(opt =>
     opt.LoginPath = "/Account/Login";
     opt.LogoutPath = "/Account/Logout";
     opt.AccessDeniedPath = "/Account/AccessDenied";
-
     opt.SlidingExpiration = true;
     opt.ExpireTimeSpan = TimeSpan.FromDays(14);
 
     opt.Cookie.Name = "FreshDrink.Auth";
     opt.Cookie.HttpOnly = true;
     opt.Cookie.SameSite = SameSiteMode.Lax;
-    opt.Cookie.SecurePolicy = CookieSecurePolicy.None;
 });
 
 
@@ -82,17 +81,27 @@ builder.Services.AddSession(opt =>
 });
 
 
-// ----------------------- SEED ADMIN -----------------------
-builder.Services.AddTransient<IdentitySeeder>();
+// ----------------------- SERVICES -----------------------
+builder.Services.AddTransient<IdentitySeeder>(); // Admin seed
+
 
 var app = builder.Build();
 
 
-// ---- Run Seeder automatically ----
+// ----------------------- RUN SEEDERS -----------------------
 using (var scope = app.Services.CreateScope())
 {
-    var seeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
-    await seeder.SeedAsync();
+    var db = scope.ServiceProvider.GetRequiredService<FreshDrinkDbContext>();
+
+    // 1) Seed data mặc định (Drinks, Categories,...)
+    DataSeeder.Seed(db);
+
+    // 2) Tạo tài khoản admin nếu chưa có
+    var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+    await identitySeeder.SeedAsync();
+
+    // ⚠️ 3) Tạo file seeder từ database (DÙNG LÚC CẬP NHẬT DỮ LIỆU → rồi xoá dòng này)
+    // await SeederGenerator.GenerateDrinkSeederAsync(db);
 }
 
 
@@ -100,30 +109,12 @@ using (var scope = app.Services.CreateScope())
 app.UseRequestLocalization(app.Services
     .GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
-else
-{
-    app.UseDeveloperExceptionPage();
-}
-
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
 
-// Cookie policy fix
-app.UseCookiePolicy(new CookiePolicyOptions
-{
-    MinimumSameSitePolicy = SameSiteMode.Lax
-});
-
-// ⭐ Session trước Authentication
+app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Lax });
 app.UseSession();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -139,5 +130,4 @@ app.MapControllerRoute(
     pattern: "{controller=Store}/{action=Index}/{id?}");
 
 app.MapRazorPages();
-
 app.Run();

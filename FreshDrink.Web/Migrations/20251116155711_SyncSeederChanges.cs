@@ -1,0 +1,49 @@
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace FreshDrink.Web.Migrations
+{
+    /// <inheritdoc />
+    public partial class SyncSeederChanges : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.AddColumn<string>(
+                name: "FullName",
+                table: "AspNetUsers",
+                type: "nvarchar(max)",
+                nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_DrinkId",
+                table: "OrderItems",
+                column: "DrinkId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_OrderItems_Drinks_DrinkId",
+                table: "OrderItems",
+                column: "DrinkId",
+                principalTable: "Drinks",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropForeignKey(
+                name: "FK_OrderItems_Drinks_DrinkId",
+                table: "OrderItems");
+
+            migrationBuilder.DropIndex(
+                name: "IX_OrderItems_DrinkId",
+                table: "OrderItems");
+
+            migrationBuilder.DropColumn(
+                name: "FullName",
+                table: "AspNetUsers");
+        }
+    }
+}
