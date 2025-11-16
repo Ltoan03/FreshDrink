@@ -1,0 +1,31 @@
+@model FreshDrink.Web.ViewModels.OrderDetailVm
+
+<h3>Chi tiết đơn hàng #@Model.Id</h3>
+<p>Ngày: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+<p>Trạng thái: <strong>@Model.Status</strong></p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sản phẩm</th>
+            <th>Số lượng</th>
+            <th>Đơn giá</th>
+            <th>Thành tiền</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.Quantity</td>
+                <td>@item.UnitPrice.ToString("N0") đ</td>
+                <td>@item.LineTotal.ToString("N0") đ</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h4 class="text-end">💰 Tổng cộng: <strong>@Model.Total.ToString("N0") đ</strong></h4>
+
+<a asp-controller="Orders" asp-action="MyOrders" class="btn btn-secondary">⬅ Quay lại danh sách</a>

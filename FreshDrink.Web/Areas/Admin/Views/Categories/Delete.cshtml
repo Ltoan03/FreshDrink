@@ -1,0 +1,11 @@
+@model FreshDrink.Data.Models.Category
+
+<h3 class="mb-3 text-danger">Bạn có chắc muốn xóa danh mục?</h3>
+
+<p><strong>@Model.Name</strong></p>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <button class="btn btn-danger">Xóa</button>
+    <a asp-action="Index" class="btn btn-secondary">Hủy</a>
+</form>

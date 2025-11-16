@@ -1,0 +1,53 @@
+@using Microsoft.AspNetCore.Identity
+@using FreshDrink.Data.Identity
+@inject SignInManager<AppUser> SignInManager
+@inject UserManager<AppUser> UserManager
+
+<ul class="navbar-nav ms-auto align-items-center">
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <li class="nav-item me-3 text-muted small">
+        👋 Xin chào, <strong>@User.Identity?.Name</strong>
+    </li>
+
+    <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-dark fw-semibold" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle"></i>
+        </a>
+
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+            <li>
+                <a class="dropdown-item disabled">
+                    <i class="bi bi-person-check"></i> Đã đăng nhập
+                </a>
+            </li>
+
+            <li><hr class="dropdown-divider" /></li>
+
+            <li>
+                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="d-inline w-100">
+                    @Html.AntiForgeryToken()
+                    <button class="dropdown-item text-danger" style="cursor:pointer;">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </button>
+                </form>
+            </li>
+        </ul>
+    </li>
+}
+else
+{
+    <li class="nav-item me-2">
+        <a class="btn btn-primary btn-sm px-3" asp-controller="Account" asp-action="Login">
+            <i class="bi bi-person-fill"></i> Đăng nhập
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="btn btn-outline-secondary btn-sm px-3" asp-controller="Account" asp-action="Register">
+            <i class="bi bi-pencil-square"></i> Đăng ký
+        </a>
+    </li>
+}
+</ul>

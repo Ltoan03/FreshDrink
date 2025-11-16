@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Giới thiệu";
+}
+
+<section class="py-5 text-center">
+    <h1 class="display-5 fw-bold">FreshDrink</h1>
+    <p class="lead text-muted mt-2">
+        Website đặt đồ uống cho đồ án. Đăng nhập để đặt món, quản lý đơn hàng & thanh toán.
+    </p>
+
+    <div class="mt-4">
+        <a class="btn btn-primary btn-lg me-2" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+        <a class="btn btn-outline-secondary btn-lg" asp-controller="Account" asp-action="Register">Đăng ký</a>
+    </div>
+
+    <div class="mt-5">
+        <a class="btn btn-success btn-lg" asp-controller="Store" asp-action="Index">
+            Xem menu đồ uống
+        </a>
+    </div>
+</section>

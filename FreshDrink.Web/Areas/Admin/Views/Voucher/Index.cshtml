@@ -1,0 +1,65 @@
+@model IEnumerable<FreshDrink.Data.Models.Voucher>
+
+<h2 class="mb-3">🎟 Danh sách Voucher</h2>
+
+<a class="btn btn-primary mb-3" asp-action="Create">
+    ➕ Thêm voucher
+</a>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-warning text-center">
+        ⚠ Hiện chưa có voucher nào!
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover align-middle shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>#</th>
+                <th>Mã Voucher</th>
+                <th>Giảm (%)</th>
+                <th>Giảm tối đa</th>
+                <th>Hạn sử dụng</th>
+                <th>Trạng thái</th>
+                <th width="120"></th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.Id</td>
+                <td class="fw-bold">@v.Code</td>
+                <td>@v.Discount %</td>
+                <td>@v.MaxDiscountAmount.ToString("N0") ₫</td>
+                <td>@v.ExpiryDate.ToString("dd/MM/yyyy")</td>
+                <td>
+                    @if (v.IsActive)
+                    {
+                        <span class="badge bg-success">✔ Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">❌ Inactive</span>
+                    }
+                </td>
+                <td>
+    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-warning btn-sm">
+        ✏ Sửa
+    </a>
+
+    <form asp-action="Delete" asp-route-id="@v.Id"
+          method="post"
+          style="display:inline-block"
+          onsubmit="return confirm('Bạn chắc chắn muốn xóa voucher này?');">
+        <button class="btn btn-danger btn-sm">🗑 Xóa</button>
+    </form>
+</td>
+
+            </tr>
+        }
+        </tbody>
+    </table>
+}

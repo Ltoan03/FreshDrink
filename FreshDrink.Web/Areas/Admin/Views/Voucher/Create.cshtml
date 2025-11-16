@@ -1,0 +1,43 @@
+@model FreshDrink.Data.Models.Voucher
+
+<h2 class="mb-4">➕ Thêm Voucher mới</h2>
+
+<form method="post" class="card p-4 shadow-sm">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label class="form-label">Mã voucher</label>
+        <input asp-for="Code" class="form-control" placeholder="VD: SALE50, FREESHIP..." />
+        <span asp-validation-for="Code" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Giảm (%)</label>
+        <input asp-for="Discount" type="number" class="form-control" min="1" max="100" placeholder="Nhập từ 1 đến 100" />
+        <span asp-validation-for="Discount" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Giảm tối đa (VNĐ)</label>
+        <input asp-for="MaxDiscountAmount" type="number" class="form-control" placeholder="Ví dụ: 50000" />
+        <span asp-validation-for="MaxDiscountAmount" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ngày hết hạn</label>
+        <input asp-for="ExpiryDate" type="date" class="form-control" />
+        <span asp-validation-for="ExpiryDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="IsActive" class="form-check-input" />
+        <label class="form-check-label" for="IsActive">Kích hoạt voucher</label>
+    </div>
+
+    <button class="btn btn-success px-4">💾 Lưu</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">⬅ Quay lại</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

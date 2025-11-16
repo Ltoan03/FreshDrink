@@ -1,0 +1,19 @@
+@model DrinkListItem
+@* Model gồm: Id, Name, Price, CategoryName, ImageUrl *@
+<div class="col-sm-6 col-md-4 col-lg-3">
+    <div class="card h-100 shadow-sm">
+        <img class="card-img-top object-fit-cover" style="height:180px" src="@Model.ImageUrl" alt="@Model.Name" />
+        <div class="card-body d-flex flex-column">
+            <h6 class="card-title mb-1 text-truncate">@Model.Name</h6>
+            <div class="text-muted small mb-2">@Model.CategoryName</div>
+            <div class="fw-semibold mb-3">@Model.Price.ToString("c0")</div>
+            <div class="mt-auto d-grid gap-2">
+                <a class="btn btn-outline-primary btn-sm" asp-controller="Drinks" asp-action="Detail" asp-route-id="@Model.Id">Chi tiết</a>
+                <form asp-controller="Cart" asp-action="Add" method="post">
+                    <input type="hidden" name="drinkId" value="@Model.Id" />
+                    <button class="btn btn-primary btn-sm">Thêm vào giỏ</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

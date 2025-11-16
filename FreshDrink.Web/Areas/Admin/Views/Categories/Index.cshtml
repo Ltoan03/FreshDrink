@@ -1,0 +1,46 @@
+@model IEnumerable<FreshDrink.Data.Models.Category>
+
+@{
+    ViewData["Title"] = "Quản lý danh mục";
+}
+
+<h2 class="mb-3 fw-semibold">Danh sách danh mục</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">+ Thêm danh mục</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Tên danh mục</th>
+            <th>Trạng thái</th>
+            <th width="140">Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Id</td>
+                <td>@c.Name</td>
+                <td>
+                    @if (c.IsActive)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">Inactive</span>
+                    }
+                </td>
+                <td>
+                    <a class="btn btn-sm btn-warning"
+                       asp-action="Edit" asp-route-id="@c.Id">Sửa</a>
+
+                    <a class="btn btn-sm btn-danger"
+                       asp-action="Delete" asp-route-id="@c.Id">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

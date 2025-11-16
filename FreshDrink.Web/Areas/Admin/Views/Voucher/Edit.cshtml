@@ -1,0 +1,38 @@
+@model FreshDrink.Data.Models.Voucher
+
+<h2 class="mb-3">✏ Cập nhật Voucher</h2>
+
+<form method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="mb-3">
+        <label>Mã Voucher</label>
+        <input asp-for="Code" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Giảm (%)</label>
+        <input asp-for="Discount" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Giảm tối đa (VNĐ)</label>
+        <input asp-for="MaxDiscountAmount" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Hạn sử dụng</label>
+        <input asp-for="ExpiryDate" type="date" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Trạng thái</label>
+        <select class="form-select" asp-for="IsActive">
+            <option value="true">✔ Active</option>
+            <option value="false">❌ Inactive</option>
+        </select>
+    </div>
+
+    <button class="btn btn-primary">💾 Lưu thay đổi</button>
+    <a asp-action="Index" class="btn btn-secondary">⬅ Trở lại</a>
+</form>

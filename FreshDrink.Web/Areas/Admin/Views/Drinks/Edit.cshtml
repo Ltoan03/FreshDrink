@@ -1,0 +1,90 @@
+@model FreshDrink.Web.ViewModels.DrinkCreateVm
+
+@{
+    ViewData["Title"] = "Sửa đồ uống";
+}
+
+<h4 class="mb-3">Sửa đồ uống</h4>
+
+<form asp-area="Admin"
+      asp-controller="Drinks"
+      asp-action="Edit"
+      method="post"
+      enctype="multipart/form-data"
+      class="card border-0 shadow-sm">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="Id" />
+
+    <div class="card-body">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="CategoryId" class="form-label"></label>
+
+                <select asp-for="CategoryId" class="form-select"
+                        asp-items="ViewBag.Categories">
+                    <option value="">-- Chọn danh mục --</option>
+                </select>
+
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-check my-3">
+            <input asp-for="IsFeatured" class="form-check-input" />
+            <label asp-for="IsFeatured" class="form-check-label"></label>
+        </div>
+
+
+        <!-- Ảnh hiện tại -->
+        <div class="mb-3">
+            <label class="form-label">Ảnh hiện tại</label><br />
+            <img src="@(string.IsNullOrWhiteSpace(Model.ImageUrl) ? Url.Content("~/img/placeholder.jpg") : Model.ImageUrl)"
+                 class="rounded mb-2" style="width:120px;height:120px;object-fit:cover;">
+        </div>
+
+        <!-- Ảnh mới -->
+        <div class="mb-3">
+            <label asp-for="ImageFile" class="form-label">Ảnh mới (nếu muốn đổi)</label>
+            <input asp-for="ImageFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="form-control" />
+            <span asp-validation-for="ImageFile" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label"></label>
+            <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        </div>
+
+        <div class="form-check my-3">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">Đang bán</label>
+        </div>
+
+    </div>
+
+    <div class="card-footer bg-transparent d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-area="Admin" asp-controller="Drinks" asp-action="Index">Hủy</a>
+        <button type="submit" class="btn btn-primary">Lưu</button>
+    </div>
+
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

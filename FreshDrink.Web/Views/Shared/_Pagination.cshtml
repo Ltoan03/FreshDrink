@@ -1,0 +1,22 @@
+@model PagedResultBase
+@{
+    var totalPages = (int)Math.Ceiling((double)Model.TotalRecords / Model.PageSize);
+    int page = Model.PageIndex;
+    if (totalPages <= 1) { return; }
+}
+<nav aria-label="Pagination">
+    <ul class="pagination">
+        <li class="page-item @(page<=1?"disabled":null)">
+            <a class="page-link" href="?pageIndex=@(page-1)&pageSize=@Model.PageSize&@Model.QueryString">«</a>
+        </li>
+        @for (int i=1; i<= totalPages; i++)
+        {
+            <li class="page-item @(i==page?"active":null)">
+                <a class="page-link" href="?pageIndex=@i&pageSize=@Model.PageSize&@Model.QueryString">@i</a>
+            </li>
+        }
+        <li class="page-item @(page>=totalPages?"disabled":null)">
+            <a class="page-link" href="?pageIndex=@(page+1)&pageSize=@Model.PageSize&@Model.QueryString">»</a>
+        </li>
+    </ul>
+</nav>

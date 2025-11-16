@@ -1,0 +1,155 @@
+@model FreshDrink.Web.Models.DrinkListItem
+
+@{
+    ViewData["Title"] = Model.Name;
+
+    string img = string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? Url.Content("~/img/placeholder.jpg")
+        : Model.ImageUrl.StartsWith("http")
+            ? Model.ImageUrl
+            : Url.Content(Model.ImageUrl.StartsWith("/img/")
+                ? Model.ImageUrl
+                : $"~/img/drinks/{Model.ImageUrl}");
+}
+
+<div class="container py-5 product-detail">
+
+    <div class="row g-5 align-items-center">
+
+        <!-- IMAGE -->
+        <div class="col-12 col-md-6">
+            <div class="detail-img-wrapper shadow rounded-4 overflow-hidden">
+                <img src="@img" alt="@Model.Name" class="detail-img w-100" style="object-fit:cover;" />
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="col-12 col-md-6">
+
+            <h2 class="fw-bold mb-2">@Model.Name</h2>
+
+            <!-- CATEGORY -->
+            <span class="badge bg-light border text-dark mb-3 d-inline-flex align-items-center gap-1">
+                <i class="bi bi-tag"></i> @Model.CategoryName
+            </span>
+
+            <!-- ⭐ RATING + REVIEWS -->
+            <div class="mb-3">
+                <span class="text-warning fs-5">
+
+                    @{
+                        int fullStars = (int)Math.Round(Model.Rating);
+                    }
+
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= fullStars)
+                        {
+                            <i class="bi bi-star-fill"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-star"></i>
+                        }
+                    }
+                </span>
+
+                <span class="text-muted">
+                    (@Model.ReviewsCount đánh giá)
+                </span>
+            </div>
+
+            <!-- 🔥 SOLD COUNT -->
+            <div class="text-muted mb-3">
+                🛍 <b>@Model.SoldCount</b> lượt mua
+            </div>
+
+            <!-- PRICE -->
+            <div class="price-box mb-4">
+                <span class="price text-success fw-bold fs-3">
+                    @String.Format("{0:N0}đ", Model.Price)
+                </span>
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="d-flex gap-3">
+                <a asp-controller="Store" asp-action="Index" class="btn btn-outline-secondary px-4 rounded-pill">
+                    ← Quay lại
+                </a>
+
+                <form asp-controller="Cart" asp-action="Add" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="drinkId" value="@Model.Id" />
+                    <button class="btn btn-success px-4 rounded-pill" type="submit">
+                        🛒 Thêm vào giỏ
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================= -->
+    <!-- 🧃 REVIEW FORM -->
+    <!-- ============================= -->
+    <hr class="my-5" />
+
+    <h4 class="fw-bold mb-3">Đánh giá sản phẩm</h4>
+
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <form asp-controller="Reviews" asp-action="Add" method="post" class="border p-4 rounded-4 bg-light mb-4">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="drinkId" value="@Model.Id" />
+
+            <label class="fw-semibold">Chọn số sao:</label>
+            <select name="rating" class="form-select w-auto mb-3">
+                <option value="5">⭐ 5 - Tuyệt vời</option>
+                <option value="4">⭐ 4 - Tốt</option>
+                <option value="3">⭐ 3 - Tạm ổn</option>
+                <option value="2">⭐ 2 - Tệ</option>
+                <option value="1">⭐ 1 - Rất tệ</option>
+            </select>
+
+            <textarea name="comment" class="form-control mb-3" rows="3" placeholder="Viết cảm nhận của bạn..."></textarea>
+
+            <button class="btn btn-primary rounded-pill px-4">Gửi đánh giá</button>
+        </form>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            🔐 Bạn cần <a href="/account/login" class="fw-bold text-decoration-underline">đăng nhập</a> để đánh giá.
+        </div>
+    }
+
+    <!-- ============================= -->
+    <!-- 💬 REVIEW LIST -->
+    <!-- ============================= -->
+    <h4 class="fw-bold mt-4 mb-3">Bình luận của khách hàng</h4>
+
+    @if (ViewBag.Reviews != null && ViewBag.Reviews.Count > 0)
+    {
+        @foreach (var r in ViewBag.Reviews)
+        {
+            <div class="border rounded-4 p-3 mb-3">
+                <strong>@r.UserName</strong>
+                <br />
+
+                <span class="text-warning">
+                    @for (int i = 1; i <= 5; i++)
+                    {
+                        if (i <= r.Rating) { <i class="bi bi-star-fill"></i> }
+                        else { <i class="bi bi-star"></i> }
+                    }
+                </span>
+
+                <p class="mt-2">@r.Comment</p>
+                <small class="text-muted">@r.CreatedAt.ToString("dd/MM/yyyy HH:mm")</small>
+            </div>
+        }
+    }
+    else
+    {
+        <p class="text-muted">⛔ Chưa có bình luận nào.</p>
+    }
+</div>

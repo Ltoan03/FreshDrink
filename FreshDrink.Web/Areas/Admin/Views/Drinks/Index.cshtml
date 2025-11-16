@@ -1,0 +1,59 @@
+@model IEnumerable<FreshDrink.Data.Models.Drink>
+
+@{
+    ViewData["Title"] = "Quản lý đồ uống";
+}
+
+<h3 class="mb-3">Quản lý đồ uống</h3>
+
+<div class="d-flex justify-content-end mb-3">
+    <a asp-area="Admin" asp-controller="Drinks" asp-action="Create" class="btn btn-primary">
+        + Thêm đồ uống
+    </a>
+</div>
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th style="width:100px;">Ảnh</th>
+            <th>Tên</th>
+            <th style="width:200px;">Danh mục</th>
+            <th style="width:130px;">Giá</th>
+            <th style="width:160px;">Thao tác</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @foreach (var d in Model)
+        {
+            var img = string.IsNullOrWhiteSpace(d.ImageUrl)
+                      ? Url.Content("~/img/placeholder.jpg")
+                      : d.ImageUrl;
+
+            <tr>
+                <td>
+                    <img src="@img" class="rounded" style="width:60px;height:60px;object-fit:cover;" />
+                </td>
+
+                <td>@d.Name</td>
+
+                <td>@d.Category?.Name</td>
+
+                <td>@string.Format("{0:N0}đ", d.Price)</td>
+
+                <td>
+                    <a asp-area="Admin" asp-controller="Drinks" asp-action="Edit" asp-route-id="@d.Id"
+                       class="btn btn-sm btn-warning me-1">
+                        Sửa
+                    </a>
+
+                    <a asp-area="Admin" asp-controller="Drinks" asp-action="Delete" asp-route-id="@d.Id"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Bạn có chắc muốn xóa đồ uống này?');">
+                        Xóa
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,69 @@
+@model FreshDrink.Web.ViewModels.DrinkCreateVm
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Thêm đồ uống";
+    // Lấy SelectList từ ViewBag (do controller đẩy vào)
+    var categories = (ViewBag.Categories as SelectList) 
+                     ?? new SelectList(Enumerable.Empty<SelectListItem>());
+}
+
+<h4 class="mb-3">Thêm đồ uống</h4>
+
+<form asp-area="Admin"
+      asp-controller="Drinks"
+      asp-action="Create"
+      method="post"
+      enctype="multipart/form-data"
+      class="card border-0 shadow-sm">
+    @Html.AntiForgeryToken()
+
+    <div class="card-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="Price" class="form-label"></label>
+                <input asp-for="Price" class="form-control" inputmode="decimal" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="CategoryId" class="form-label"></label>
+                <select asp-for="CategoryId" asp-items="categories" class="form-select">
+                    <option value="">-- Chọn danh mục --</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="form-check my-3">
+            <input asp-for="IsFeatured" class="form-check-input" />
+            <label asp-for="IsFeatured" class="form-check-label">Đánh dấu nổi bật</label>
+        </div>
+
+        <div class="mb-3">
+    <label asp-for="ImageFile" class="form-label"></label>
+    <input asp-for="ImageFile" type="file" accept=".jpg,.jpeg,.png,.webp" class="form-control" />
+    <span class="form-text">Chấp nhận: .jpg, .jpeg, .png, .webp</span>
+    <span asp-validation-for="ImageFile" class="text-danger"></span>
+</div>
+
+    </div>
+
+    <div class="card-footer bg-transparent d-flex gap-2">
+        <a class="btn btn-outline-secondary" 
+           asp-area="Admin" asp-controller="Drinks" asp-action="Index">Hủy</a>
+        <button type="submit" class="btn btn-primary">Lưu</button>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,350 @@
+/* =======================================================
+   🍹 FRESHDINK PREMIUM UI — Mint Blue Modern
+======================================================= */
+:root {
+    --brand: #12c7db;
+    --brand-hover: #0ea7be;
+    --brand-soft: #b8f8ff;
+    --brand-light: #eafbff;
+    --text: #1b1b1b;
+    --muted: #6c757d;
+    --bg: #f5feff;
+    --danger: #ff4a4a;
+    --success: #34d67e;
+    --radius: 16px;
+    --shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* =============================== BASE =============================== */
+html { scroll-behavior: smooth; font-size: 15px; }
+@media (min-width: 768px){ html { font-size: 16px; } }
+
+body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", sans-serif;
+    padding-top: 88px;
+    padding-bottom: 95px;
+    transition: .3s;
+}
+
+/* =============================== NAVBAR =============================== */
+.main-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #d9f5fa;
+    transition: .25s;
+    z-index: 9999;
+}
+
+.main-nav.shrink {
+    padding: 4px 0;
+    box-shadow: var(--shadow);
+}
+
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 500;
+    padding-bottom: 2px;
+    color: #3a3a3a;
+    transition: .25s ease;
+}
+
+.nav-link:hover { color: var(--brand); }
+
+.nav-link.active {
+    color: var(--brand) !important;
+    font-weight: 700;
+    border-bottom: 3px solid var(--brand);
+}
+
+.nav-link i { transition: .2s; }
+.nav-link:hover i { transform: scale(1.2) rotate(-5deg); }
+
+/* CART BADGE */
+#cart-count {
+    background: var(--danger);
+    padding: 3px 7px;
+    font-size: 11px;
+    color: white;
+    border-radius: 40px;
+    animation: pop .25s ease;
+}
+@keyframes pop { 0%{ transform:scale(.5); } 100%{ transform:scale(1); } }
+
+/* =============================== FEATURED SECTION =============================== */
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.featured-scroll {
+    display: flex;
+    gap: 26px;
+    overflow-x: auto;
+    padding: 6px 4px 18px;
+    scroll-behavior: smooth;
+}
+
+.featured-scroll::-webkit-scrollbar { height: 6px; }
+.featured-scroll::-webkit-scrollbar-thumb {
+    background: var(--brand);
+    border-radius: 10px;
+}
+
+/* ===== DRINK CARD ===== */
+.drink-card {
+    width: 240px;
+    background: #fff;
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+    transition: .26s ease;
+    flex-shrink: 0;
+}
+
+.drink-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow);
+}
+
+/* Image fixed height + cover */
+.drink-img {
+    position: relative;
+    height: 210px;
+    overflow: hidden;
+}
+
+.drink-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: .3s;
+}
+
+.drink-card:hover .drink-photo {
+    transform: scale(1.08);
+}
+
+/* Featured badge */
+.badge-featured {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: var(--brand);
+    padding: 6px 12px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 999px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Info Area */
+.drink-info {
+    padding: 12px;
+}
+
+.drink-info small {
+    color: var(--muted);
+}
+
+.drink-info h6 {
+    margin: 6px 0 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Price and button row */
+.price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.price-row .price {
+    font-weight: 700;
+    color: var(--brand);
+}
+
+/* View Button */
+.btn-view {
+    padding: 6px 16px;
+    font-size: 14px;
+    border-radius: 999px;
+    border: 1px solid var(--brand);
+    color: var(--brand);
+    transition: .24s;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-view:hover {
+    background: var(--brand);
+    color: white;
+}
+
+/* =============================== FOOTER =============================== */
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 14px;
+    box-shadow:0 -5px 18px rgba(0,0,0,0.05);
+    border-top:1px solid #d8f4fa;
+}
+
+/* =============================== FLOAT BUTTON =============================== */
+.contact-wrapper { position:fixed; bottom:95px; right:20px; }
+
+.contact-btn {
+    width:60px; height:60px;
+    background:var(--brand);
+    color:white;
+    border-radius:50%;
+    border:none;
+    font-size:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition:.25s;
+    box-shadow:var(--shadow);
+}
+.contact-btn:hover { transform:scale(1.1); }
+
+.contact-menu {
+    display:none;
+    flex-direction:column;
+    background:white;
+    padding:12px;
+    border-radius:var(--radius);
+    margin-bottom:10px;
+    box-shadow:var(--shadow);
+}
+.contact-menu.show { display:flex; }
+.contact-menu a {
+    padding:10px;
+    border-radius:8px;
+    display:flex;
+    gap:8px;
+    transition:.22s;
+}
+.contact-menu a:hover { background:var(--brand-light); }
+
+/* =============================== RESPONSIVE =============================== */
+@media(max-width:768px){
+    body{ padding-top:70px; }
+    .drink-card{ width: 180px; }
+}
+/* ===== Button: Xem Tất Cả ===== */
+.btn-see-all {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--brand);
+    padding: 8px 18px;
+    border-radius: 50px;
+    border: 2px solid var(--brand);
+    background: white;
+    transition: 0.25s ease;
+    text-decoration: none;
+}
+
+.btn-see-all:hover {
+    background: var(--brand);
+    color: white;
+    box-shadow: 0 6px 15px rgba(18, 199, 219, 0.35);
+    transform: translateY(-2px);
+}
+
+.btn-see-all i {
+    font-size: 18px;
+    transition: .25s ease;
+}
+
+.btn-see-all:hover i {
+    transform: translateX(4px);
+}
+.sidebar-item {
+    padding: 12px;
+    font-size: 15px;
+    transition: .2s;
+    border-radius: 8px !important;
+}
+
+.sidebar-item:hover {
+    background: #e9fbff;
+    color: var(--brand);
+}
+
+.sidebar-item.active {
+    background: var(--brand);
+    color: white !important;
+    font-weight: 600;
+}
+
+.product-card img {
+    transition: .35s ease;
+}
+
+.product-card:hover img {
+    transform: scale(1.08);
+}
+/* Product Detail Page */
+.product-detail { animation: fadeIn .4s ease; }
+
+.detail-img-wrapper {
+    background: white;
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+}
+
+.detail-img {
+    width: 100%;
+    height: 380px;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: .3s ease;
+}
+
+.detail-img:hover { transform: scale(1.05); }
+
+.price-box .price {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--brand);
+}
+
+.btn-brand {
+    background: var(--brand);
+    color: white;
+    border: none;
+    transition: .25s;
+}
+.btn-brand:hover { background: var(--brand-hover); }
+
+/* Mobile Responsive Fix */
+@media(max-width: 768px) {
+    .detail-img { height: 260px; }
+    .price-box .price { font-size: 26px; }
+}

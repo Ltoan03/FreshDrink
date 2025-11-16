@@ -1,14 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using FreshDrink.Api.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<AppDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();   // <-- có sau khi cài Swashbuckle
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();               // <-- có sau khi cài Swashbuckle
+    app.UseSwagger();
     app.UseSwaggerUI();
 }
 

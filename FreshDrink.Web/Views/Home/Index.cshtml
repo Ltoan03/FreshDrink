@@ -1,0 +1,165 @@
+﻿@model IEnumerable<FreshDrink.Web.Models.DrinkListItem>
+
+@{
+    ViewData["Title"] = "Trang chủ";
+
+    var banners = ViewBag.Banners as IEnumerable<string>;
+
+    if (banners == null || !banners.Any())
+    {
+        banners = new List<string>
+        {
+            Url.Content("~/img/banners/banner1.jpg"),
+            Url.Content("~/img/banners/banner2.jpg"),
+            Url.Content("~/img/banners/banner3.jpg")
+        };
+    }
+}
+
+<!-- ================= HERO CAROUSEL ================= -->
+<div id="homeHero" class="carousel slide mb-4 rounded shadow" data-bs-ride="carousel">
+
+    <div class="carousel-indicators">
+        @for (int i = 0; i < banners.Count(); i++)
+        {
+            <button type="button"
+                    data-bs-target="#homeHero"
+                    data-bs-slide-to="@i"
+                    class="@(i == 0 ? "active" : "")"
+                    aria-label="Slide @(i + 1)">
+            </button>
+        }
+    </div>
+
+    <div class="carousel-inner rounded-4 overflow-hidden">
+        @{
+            int index = 0;
+            foreach (var img in banners)
+            {
+                var safeImg = img.StartsWith("http") ? img : Url.Content(img);
+
+                <div class="carousel-item @(index == 0 ? "active" : "")">
+                    <div class="ratio ratio-21x9">
+                        <img src="@safeImg" class="img-cover" alt="Banner">
+                    </div>
+                </div>;
+
+                index++;
+            }
+        }
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeHero" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+
+    <button class="carousel-control-next" type="button" data-bs-target="#homeHero" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+
+
+<!-- ================= FEATURED SECTION ================= -->
+<div class="featured-header d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center gap-2">
+        <span class="icon-hot">🔥</span>
+        <h4 class="fw-bold text-primary m-0">Sản phẩm nổi bật</h4>
+        <div class="section-accent"></div>
+    </div>
+
+   <a asp-controller="Store" asp-action="Index" class="btn-see-all">
+    Xem tất cả <i class="bi bi-arrow-right"></i>
+</a>
+
+</div>
+
+@if (Model != null && Model.Any())
+{
+    <!-- THÊM id="featuredStrip" để JS auto-scroll -->
+    <div id="featuredStrip" class="featured-scroll d-flex">
+
+        @foreach (var d in Model)
+        {
+            string imgUrl;
+
+            if (string.IsNullOrWhiteSpace(d.ImageUrl))
+                imgUrl = Url.Content("~/img/placeholder.jpg");
+            else if (d.ImageUrl.StartsWith("http"))
+                imgUrl = d.ImageUrl;
+            else if (!d.ImageUrl.StartsWith("/img/"))
+                imgUrl = Url.Content($"~/img/drinks/{d.ImageUrl}");
+            else
+                imgUrl = Url.Content(d.ImageUrl);
+
+            <div class="drink-card">
+                <div class="drink-img">
+                    <img src="@imgUrl" alt="@d.Name" class="drink-photo" />
+
+                    @if (d.IsFeatured)
+                    {
+                        <span class="badge-featured">
+                            <i class="bi bi-fire"></i> HOT
+                        </span>
+                    }
+                </div>
+
+                <div class="drink-info">
+                    <small class="text-muted">@d.CategoryName</small>
+                    <h6 title="@d.Name">@d.Name</h6>
+
+                    <div class="price-row">
+                        <span class="price">@String.Format("{0:N0}đ", d.Price)</span>
+                        <a asp-controller="Store"
+                           asp-action="Details"
+                           asp-route-id="@d.Id"
+                           class="btn-view">
+                            <i class="bi bi-eye"></i> Xem
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="alert alert-info mt-2">Chưa có sản phẩm nổi bật.</div>
+}
+
+
+@section Scripts {
+<script>
+    (function () {
+        // Carousel banner
+        const hero = document.getElementById('homeHero');
+        if (hero && window.bootstrap) {
+            new bootstrap.Carousel(hero, { interval: 3500 });
+        }
+
+        // Auto scroll cho strip sản phẩm nổi bật
+        const strip = document.getElementById('featuredStrip');
+        if (!strip) return;
+
+        let direction = 1;           // 1 = trượt sang phải, -1 = sang trái
+        const speed = 2;             // px mỗi bước
+        const interval = 30;         // ms
+
+        setInterval(() => {
+            if (!strip) return;
+
+            strip.scrollLeft += speed * direction;
+
+            // chạm cuối thì quay lại đầu
+            if (strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 1) {
+                direction = -1; // nếu muốn quay đầu lại
+                // hoặc: strip.scrollLeft = 0; direction = 1; // nếu muốn loop về đầu luôn
+            }
+
+            // chạm đầu thì đổi chiều
+            if (strip.scrollLeft <= 0) {
+                direction = 1;
+            }
+        }, interval);
+    })();
+</script>
+}

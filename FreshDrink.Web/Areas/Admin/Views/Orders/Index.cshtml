@@ -1,0 +1,27 @@
+@model IEnumerable<FreshDrink.Data.Models.Order>
+
+<h2>📦 Quản lý đơn hàng</h2>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Người đặt</th>
+            <th>Ngày tạo</th>
+            <th>Trạng thái</th>
+            <th>Tổng</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var o in Model)
+    {
+        <tr>
+            <td>@o.Id</td>
+            <td>@o.User?.UserName</td>
+            <td>@o.CreatedAt</td>
+            <td>@o.Status</td>
+            <td>@o.Total.ToString("C")</td>
+        </tr>
+    }
+    </tbody>
+</table>

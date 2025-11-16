@@ -1,0 +1,54 @@
+@model CheckoutVm  
+@* {FullName, Phone, Address, PaymentProvider} *@
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+<h3 class="mb-3">Thông tin thanh toán</h3>
+
+<form asp-action="PlaceOrder" method="post" class="row g-3 needs-validation" novalidate>
+    <div class="col-md-6">
+        <label class="form-label">Họ tên</label>
+        <input asp-for="FullName" class="form-control" required />
+        <div class="invalid-feedback">Vui lòng nhập họ tên.</div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Số điện thoại</label>
+        <input asp-for="Phone" class="form-control" required />
+        <div class="invalid-feedback">Vui lòng nhập số điện thoại.</div>
+    </div>
+    <div class="col-12">
+        <label class="form-label">Địa chỉ</label>
+        <input asp-for="Address" class="form-control" required />
+        <div class="invalid-feedback">Vui lòng nhập địa chỉ.</div>
+    </div>
+    <div class="col-md-6">
+        <label class="form-label">Phương thức thanh toán</label>
+        <select asp-for="PaymentProvider" class="form-select" required>
+            <option value="">-- Chọn --</option>
+            <option>COD</option>
+            <option>MOMO</option>
+            <option>VNPAY</option>
+        </select>
+        <div class="invalid-feedback">Vui lòng chọn phương thức.</div>
+    </div>
+
+    <div class="col-12 d-flex justify-content-between mt-2">
+        <a class="btn btn-outline-secondary" asp-controller="Cart" asp-action="Index">Quay lại giỏ</a>
+        <button class="btn btn-success px-4">Đặt hàng</button>
+    </div>
+</form>
+
+@section Scripts{
+<script>
+(() => {
+  'use strict';
+  const forms = document.querySelectorAll('.needs-validation');
+  Array.from(forms).forEach(form => {
+    form.addEventListener('submit', e => {
+      if (!form.checkValidity()) { e.preventDefault(); e.stopPropagation(); }
+      form.classList.add('was-validated');
+    }, false);
+  });
+})();
+</script>
+}

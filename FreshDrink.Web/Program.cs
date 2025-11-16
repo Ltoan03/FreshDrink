@@ -1,46 +1,113 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection; // CreateScope
+using FreshDrink.Data;
+using FreshDrink.Data.Identity;
 using FreshDrink.Web.Data;
-using FreshDrink.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
-
-// Db cho Identity (+ retry cho lỗi kết nối tạm thời)
+// ----------------------- DATABASE -----------------------
 builder.Services.AddDbContext<AuthDbContext>(opt =>
-    opt.UseSqlServer(
-        builder.Configuration.GetConnectionString("AuthConnection"),
-        sql => sql.EnableRetryOnFailure()
-    )
-);
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Identity + Cookie
-builder.Services.AddIdentity<AppUser, IdentityRole>(o =>
+builder.Services.AddDbContext<FreshDrinkDbContext>(opt =>
+    opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+// ----------------------- IDENTITY -----------------------
+builder.Services.AddIdentity<AppUser, IdentityRole>(opt =>
 {
-    o.Password.RequireNonAlphanumeric = false;
-    o.Password.RequireUppercase = false;
-    o.Password.RequireDigit = false;
-    o.Password.RequiredLength = 4;
+    opt.SignIn.RequireConfirmedAccount = false;
+    opt.Password.RequireNonAlphanumeric = false;
+    opt.Password.RequireUppercase = false;
+    opt.Password.RequireDigit = false;
+    opt.Password.RequireLowercase = true;
+    opt.Password.RequiredLength = 4;
 })
 .AddEntityFrameworkStores<AuthDbContext>()
-.AddDefaultTokenProviders();
+.AddDefaultTokenProviders()
+.AddDefaultUI();
 
+
+// ----------------------- AUTH COOKIE -----------------------
 builder.Services.ConfigureApplicationCookie(opt =>
 {
     opt.LoginPath = "/Account/Login";
+    opt.LogoutPath = "/Account/Logout";
     opt.AccessDeniedPath = "/Account/AccessDenied";
+
+    opt.SlidingExpiration = true;
+    opt.ExpireTimeSpan = TimeSpan.FromDays(14);
+
+    opt.Cookie.Name = "FreshDrink.Auth";
+    opt.Cookie.HttpOnly = true;
+    opt.Cookie.SameSite = SameSiteMode.Lax;
+    opt.Cookie.SecurePolicy = CookieSecurePolicy.None;
 });
 
-builder.Services.AddSession();
+
+// ----------------------- AUTHORIZATION -----------------------
+builder.Services.AddAuthorization(o =>
+{
+    o.AddPolicy("AdminOnly", p => p.RequireRole("Admin"));
+});
+
+
+// ----------------------- LOCALIZATION -----------------------
+var supportedCultures = new[] { new CultureInfo("vi-VN") };
+builder.Services.Configure<RequestLocalizationOptions>(o =>
+{
+    o.DefaultRequestCulture = new RequestCulture("vi-VN");
+    o.SupportedCultures = supportedCultures;
+    o.SupportedUICultures = supportedCultures;
+});
+
+
+// ----------------------- MVC / TempData -----------------------
+builder.Services.AddControllersWithViews().AddSessionStateTempDataProvider();
+builder.Services.AddRazorPages();
+
+
+// ----------------------- SESSION -----------------------
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(opt =>
+{
+    opt.IdleTimeout = TimeSpan.FromHours(6);
+    opt.Cookie.Name = "FreshDrink.Session";
+    opt.Cookie.HttpOnly = true;
+    opt.Cookie.IsEssential = true;
+    opt.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+
+// ----------------------- SEED ADMIN -----------------------
+builder.Services.AddTransient<IdentitySeeder>();
 
 var app = builder.Build();
+
+
+// ---- Run Seeder automatically ----
+using (var scope = app.Services.CreateScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
+    await seeder.SeedAsync();
+}
+
+
+// ----------------------- PIPELINE -----------------------
+app.UseRequestLocalization(app.Services
+    .GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
 
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
+}
+else
+{
+    app.UseDeveloperExceptionPage();
 }
 
 app.UseHttpsRedirection();
@@ -48,56 +115,29 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+// Cookie policy fix
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.Lax
+});
+
+// ⭐ Session trước Authentication
 app.UseSession();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-/* Storefront: /store */
-app.MapControllerRoute(
-    name: "store",
-    pattern: "store/{action=Index}/{id?}",
-    defaults: new { controller = "Store" });
 
-/* Admin (mặc định): / */
+// ----------------------- ROUTES -----------------------
+app.MapAreaControllerRoute(
+    name: "admin",
+    areaName: "Admin",
+    pattern: "Admin/{controller=Drinks}/{action=Index}/{id?}");
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Store}/{action=Index}/{id?}");
 
-/* ===== Auto-migrate + seed (bỏ qua khi chạy tool design-time) ===== */
-var isDesignTime = AppDomain.CurrentDomain
-    .GetAssemblies()
-    .Any(a => a.GetName().Name == "Microsoft.EntityFrameworkCore.Design");
-
-if (!isDesignTime)
-{
-    using var scope = app.Services.CreateScope();
-    var sp = scope.ServiceProvider;
-
-    // Tạo DB + áp migrations nếu chưa có
-    var db = sp.GetRequiredService<AuthDbContext>();
-    await db.Database.MigrateAsync();
-
-    // Seed role + admin
-    var roleMgr = sp.GetRequiredService<RoleManager<IdentityRole>>();
-    var userMgr = sp.GetRequiredService<UserManager<AppUser>>();
-
-    foreach (var r in new[] { "admin", "user" })
-        if (!await roleMgr.RoleExistsAsync(r))
-            await roleMgr.CreateAsync(new IdentityRole(r));
-
-    var admin = await userMgr.FindByEmailAsync("admin@freshdrink.local");
-    if (admin is null)
-    {
-        admin = new AppUser
-        {
-            UserName = "admin@freshdrink.local",
-            Email = "admin@freshdrink.local",
-            FullName = "Administrator"
-        };
-        await userMgr.CreateAsync(admin, "1234"); // đổi khi nộp
-        await userMgr.AddToRoleAsync(admin, "admin");
-    }
-}
-/* ===== End auto-migrate + seed ===== */
+app.MapRazorPages();
 
 app.Run();
