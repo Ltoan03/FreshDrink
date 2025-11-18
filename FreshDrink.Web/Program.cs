@@ -94,7 +94,7 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<FreshDrinkDbContext>();
 
     // 1) Seed data mặc định (Drinks, Categories,...)
-    DataSeeder.Seed(db);
+    await DataSeeder.SeedAsync(app);
 
     // 2) Tạo tài khoản admin nếu chưa có
     var identitySeeder = scope.ServiceProvider.GetRequiredService<IdentitySeeder>();
@@ -131,3 +131,4 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 app.Run();
+await DataSeeder.SeedAsync(app);

@@ -1,13 +1,42 @@
 using FreshDrink.Data;
 using FreshDrink.Data.Models;
+using FreshDrink.Data.Identity;
+using Microsoft.AspNetCore.Identity;
 
 namespace FreshDrink.Web.Data
 {
     public static class DataSeeder
     {
-        public static void Seed(FreshDrinkDbContext db)
+        public static async Task SeedAsync(IApplicationBuilder app)
         {
-            // Seed Categories nếu thiếu hoặc chưa đủ
+            using var scope = app.ApplicationServices.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<FreshDrinkDbContext>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            // ==================== 1) Seed Role =======================
+            if (!await roleManager.RoleExistsAsync("Admin"))
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+            // ==================== 2) Seed Admin User ==================
+            var adminEmail = "admin@freshdrink.com";
+            var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+            if (adminUser == null)
+            {
+                adminUser = new AppUser
+                {
+                    FullName = "FreshDrink Administrator",
+                    Email = adminEmail,
+                    UserName = adminEmail,
+                    EmailConfirmed = true
+                };
+
+                await userManager.CreateAsync(adminUser, "Admin123!");
+                await userManager.AddToRoleAsync(adminUser, "Admin");
+            }
+
+            // ==================== 3) Seed Categories ==================
             var categoryNames = new[] { "Coconut", "Coffee", "Juice", "Milk Tea", "Smoothie", "Soda", "Tea" };
 
             foreach (var name in categoryNames)
@@ -19,8 +48,7 @@ namespace FreshDrink.Web.Data
             }
             db.SaveChanges();
 
-
-            // Seed Drinks (không cần check !Any, tránh skip)
+            // ==================== 4) Seed Drinks =====================
             void AddDrink(string name, decimal price, string category, string img)
             {
                 if (!db.Drinks.Any(d => d.Name == name))
@@ -40,6 +68,8 @@ namespace FreshDrink.Web.Data
                 }
             }
 
+            // Your existing seed list
+            AddDrink("Trà Sữa Trân Châu Đường Đen", 25000, "Coffee", "/img/drinks/tra-sua-tran-chau-duong-den.jpg");
             AddDrink("Caffee Sữa", 25000, "Coffee", "/img/drinks/88d25.jpg");
             AddDrink("Coffee Đen", 20000, "Coffee", "/img/drinks/97a8.jpg");
             AddDrink("Bạc xỉu", 28000, "Coffee", "/img/drinks/5288.png");

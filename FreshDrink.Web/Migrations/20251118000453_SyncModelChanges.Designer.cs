@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FreshDrink.Web.Migrations
 {
     [DbContext(typeof(FreshDrinkDbContext))]
-    [Migration("20251116155711_SyncSeederChanges")]
-    partial class SyncSeederChanges
+    [Migration("20251118000453_SyncModelChanges")]
+    partial class SyncModelChanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
