@@ -1,8 +1,13 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Http
+@using FreshDrink.Web.Infrastructure
+
+@{
     var title = ViewData["Title"] as string ?? "FreshDrink";
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
     bool isHome = controller.Equals("Home", StringComparison.OrdinalIgnoreCase);
     bool isStore = controller.Equals("Store", StringComparison.OrdinalIgnoreCase);
+
+    int cartCount = Context.Session.GetInt32("CartCount") ?? 0;
 }
 
 <!doctype html>
@@ -19,12 +24,12 @@
 
 <body class="d-flex flex-column min-vh-100">
 
-<header class="main-nav">
-    <nav class="navbar navbar-expand-lg navbar-light container py-2">
+<header class="main-nav shadow-sm bg-white">
+    <nav class="navbar navbar-expand-lg container py-2">
 
-        <!-- LOGO -->
-        <a class="navbar-brand fw-bold fs-4 text-decoration-none" asp-controller="Home" asp-action="Index">
-            <i class="bi bi-cup-straw"></i> FreshDrink
+        <!-- logo -->
+        <a class="navbar-brand fw-bold fs-4" asp-controller="Home" asp-action="Index">
+            FreshDrink
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -33,56 +38,58 @@
 
         <div id="mainNav" class="collapse navbar-collapse">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
                 <li class="nav-item">
-                    <a class="nav-link @(isHome ? "active" : "")" asp-controller="Home" asp-action="Index">
-                        <i class="bi bi-house-door-fill"></i> Trang chủ
+                    <a class="nav-link @(isHome ? "active fw-bold text-primary" : "")" asp-controller="Home" asp-action="Index">
+                        Trang chủ
                     </a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link @(isStore ? "active" : "")" href="/do-uong">
-                        <i class="bi bi-cup-straw"></i> Đồ uống
+                    <a class="nav-link @(isStore ? "active fw-bold text-primary" : "")" href="/do-uong">
+                        Đồ uống
                     </a>
                 </li>
 
-                <li class="nav-item position-relative">
-                    <a class="nav-link" asp-controller="Cart" asp-action="Index">
-                        <i class="bi bi-cart3"></i> Giỏ hàng
-                        <span id="cart-count" class="badge rounded-pill bg-danger position-absolute"
-                              style="top: 2px; right: -8px; font-size: 11px; display:none;">
+                <li class="nav-item">
+                    <a class="nav-link @(controller == "Orders" ? "active fw-bold text-primary" : "")" asp-controller="Orders" asp-action="Index">
+                        Đơn hàng
+                    </a>
+                </li>
+
+                <!-- Cart badge -->
+                <li class="nav-item ms-2 position-relative">
+                    <a asp-controller="Cart" asp-action="Index" class="nav-link fw-semibold">
+                        Giỏ hàng
+                        <span class="badge bg-danger rounded-pill position-absolute top-0 start-100 translate-middle"
+                              id="cart-count"
+                              style="font-size:12px; display:@(cartCount > 0 ? "inline" : "none")">
+                              @cartCount
                         </span>
-                    </a>
-                </li>
-
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Orders" asp-action="Index">
-                        <i class="bi bi-receipt"></i> Đơn hàng
                     </a>
                 </li>
 
                 @if (User.IsInRole("Admin"))
                 {
-                    <li class="nav-item dropdown">
+                    <li class="nav-item dropdown ms-2">
                         <a class="nav-link dropdown-toggle text-danger fw-semibold" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-gear-fill"></i> Quản trị
+                            Quản trị
                         </a>
 
                         <ul class="dropdown-menu shadow-sm">
-                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Home" asp-action="Index"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Drinks" asp-action="Index"><i class="bi bi-cup-hot"></i> Quản lý đồ uống</a></li>
-                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Categories" asp-action="Index"><i class="bi bi-tags-fill"></i> Quản lý danh mục</a></li>
-                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminOrders" asp-action="Index"><i class="bi bi-box-seam"></i> Quản lý đơn hàng</a></li>
-                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Voucher" asp-action="Index"><i class="bi bi-ticket-perforated"></i> Quản lý voucher</a></li>
+                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="AdminOrders" asp-action="Index">Quản lý đơn hàng</a></li>
+                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Drinks" asp-action="Index">Quản lý đồ uống</a></li>
+                            <li><a class="dropdown-item" asp-area="Admin" asp-controller="Categories" asp-action="Index">Quản lý danh mục</a></li>
                         </ul>
                     </li>
                 }
             </ul>
 
+            <!-- 🔹 Login partial -->
             <partial name="_LoginPartial" />
         </div>
     </nav>
 </header>
-
 
 <main class="flex-fill">
     <div class="container py-4">
@@ -91,49 +98,27 @@
     </div>
 </main>
 
-
-<footer class="footer-fixed shadow-sm mt-auto">
-    <div class="container small py-3 text-center">
-        © @DateTime.Now.Year - FreshDrink <i class="bi bi-cup-hot-fill"></i> |
-        <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none">Privacy</a>
+<footer class="footer-fixed shadow-sm mt-auto bg-light">
+    <div class="container small py-3 text-center text-muted">
+        © @DateTime.Now.Year - FreshDrink | <a class="text-decoration-none" asp-controller="Home" asp-action="Privacy">Privacy</a>
     </div>
 </footer>
 
-
-<!-- 📞 Floating Contact -->
-<div class="contact-wrapper">
-    <button class="contact-btn" id="contactToggle">
-        <i class="bi bi-telephone-fill fs-4"></i>
-    </button>
-
-    <div class="contact-menu" id="contactMenu">
-        <a href="https://m.me/yourfacebookpage" target="_blank"><i class="bi bi-messenger"></i> Messenger</a>
-        <a href="tel:0394964030"><i class="bi bi-telephone"></i> Gọi: 039 496 4030</a>
-        <a href="mailto:freshdrink@gmail.com"><i class="bi bi-envelope-fill"></i> Gmail</a>
-    </div>
-</div>
-
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
 @await RenderSectionAsync("Scripts", required: false)
 
 <script>
-document.getElementById("contactToggle").onclick = () => {
-    document.getElementById("contactMenu").classList.toggle("show");
-};
-
-window.addEventListener("scroll", () => {
-    document.querySelector(".main-nav").classList.toggle("shrink", window.scrollY > 10);
-});
-
-fetch('/Cart/GetCount')
-    .then(x => x.json())
-    .then(count => {
-        if (count > 0) {
-            let badge = document.getElementById("cart-count");
-            badge.style.display = "block";
-            badge.textContent = count;
-        }
-    });
+    function refreshCartBadge() {
+        fetch('/Cart/GetCount')
+            .then(res => res.json())
+            .then(count => {
+                const badge = document.getElementById("cart-count");
+                badge.style.display = count > 0 ? "inline" : "none";
+                badge.textContent = count;
+            });
+    }
+    refreshCartBadge();
 </script>
 
 </body>

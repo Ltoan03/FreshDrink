@@ -33,7 +33,12 @@ namespace FreshDrink.Web.Controllers
             => HttpContext.Session.GetObject<List<CartItem>>(CartKey) ?? new();
 
         private void SaveCart(List<CartItem> items)
-            => HttpContext.Session.SetObject(CartKey, items);
+        {
+            HttpContext.Session.SetObject(CartKey, items);
+
+            // 👉 Cập nhật số lượng trong session để hiển thị badge
+            HttpContext.Session.SetInt32("CartCount", items.Sum(x => x.Qty));
+        }
 
 
         // ===== APPLY VOUCHER =====
@@ -62,6 +67,7 @@ namespace FreshDrink.Web.Controllers
         }
 
 
+
         // ===== ADD TO CART =====
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(int drinkId, int qty = 1)
@@ -79,9 +85,11 @@ namespace FreshDrink.Web.Controllers
 
             SaveCart(cart);
 
-            TempData["ok"] = "🛒 Đã thêm vào giỏ hàng!";
-            return Redirect(Request.Headers["Referer"].ToString() ?? "/Store");
+            TempData["ok"] = "🛒 Sản phẩm đã được thêm vào giỏ hàng!";
+
+            return Redirect(Request.Headers["Referer"].ToString() ?? "/");
         }
+
 
 
         // ===== SHOW CART =====
@@ -124,9 +132,9 @@ namespace FreshDrink.Web.Controllers
 
                 VoucherCode = voucherCode,
                 DiscountAmount = discountAmount
-
             });
         }
+
 
 
         // ===== UPDATE QUANTITY =====
@@ -144,6 +152,7 @@ namespace FreshDrink.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
 
 
         // ===== REMOVE ITEM =====

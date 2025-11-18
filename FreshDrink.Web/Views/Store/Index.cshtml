@@ -1,4 +1,5 @@
 @model IEnumerable<FreshDrink.Web.Models.DrinkListItem>
+@using System.Linq;
 
 @{
     ViewData["Title"] = "Đồ uống";
@@ -13,20 +14,18 @@
 }
 
 <div class="store-container container py-4">
-
     <div class="row g-4">
 
         <!-- SIDEBAR -->
         <aside class="col-12 col-md-4 col-lg-3">
             <div class="sidebar card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-0 py-3">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-filter-square text-primary fs-5"></i>
-                        <strong class="fs-6">Danh mục</strong>
-                    </div>
+                <div class="card-header bg-white border-0 py-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-filter-square text-primary fs-5"></i>
+                    <strong class="fs-6">Danh mục</strong>
                 </div>
 
                 <div class="list-group list-group-flush">
+
                     <a href="/do-uong"
                        class="list-group-item list-group-item-action sidebar-item @(string.IsNullOrEmpty(category) ? "active" : "")">
                         <i class="bi bi-grid"></i> Tất cả sản phẩm
@@ -34,10 +33,8 @@
 
                     @foreach (var c in (IEnumerable<dynamic>)ViewBag.Categories)
                     {
-                        string slug = c.Slug;
-                        bool isActive = category == slug;
-
-                        <a href="/do-uong?category=@slug"
+                        bool isActive = category == c.Slug;
+                        <a href="/do-uong?category=@c.Slug"
                            class="list-group-item list-group-item-action sidebar-item @(isActive ? "active" : "")">
                             <i class="bi bi-cup-straw"></i> @c.Name
                         </a>
@@ -47,45 +44,51 @@
         </aside>
 
 
-        <!-- PRODUCTS SECTION -->
+
+        <!-- PRODUCT SECTION -->
         <section class="col-12 col-md-8 col-lg-9">
 
             <!-- HEADER -->
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-
                 <h4 class="fw-bold text-primary">
-                    @(string.IsNullOrEmpty(category)
-                        ? "🥤 TẤT CẢ SẢN PHẨM"
-                        : $"🔎 {Model.FirstOrDefault()?.CategoryName}")
+
+                    @if(string.IsNullOrEmpty(category))
+                    {
+                        <text><i class="bi bi-cup-straw"></i> Tất cả sản phẩm</text>
+                    }
+                    else
+                    {
+                        <text><i class="bi bi-search"></i> @Model.FirstOrDefault()?.CategoryName</text>
+                    }
+
                 </h4>
 
+                <!-- SORT FORM -->
                 <form id="sortForm" method="get" action="/do-uong" class="d-flex gap-2 align-items-center">
                     <input type="hidden" name="q" value="@q" />
                     <input type="hidden" name="category" value="@category" />
                     <input type="hidden" name="page" value="1" />
 
                     <select name="sort" class="form-select border-primary rounded-pill px-3" style="width:155px" onchange="this.form.submit()">
-
-                        <option value="" selected="@(string.IsNullOrEmpty(sort) ? "selected" : null)"> 🔄 Mặc định </option>
-                        <option value="price-asc"  selected="@(sort == "price-asc"  ? "selected" : null)"> 💲 Giá tăng dần </option>
-                        <option value="price-desc" selected="@(sort == "price-desc" ? "selected" : null)"> 💰 Giá giảm dần </option>
-                        <option value="name"       selected="@(sort == "name"       ? "selected" : null)"> 🔤 Tên A → Z </option>
-
+                        <option value="" selected="@(string.IsNullOrEmpty(sort) ? "selected" : null)"> Mặc định </option>
+                        <option value="price-asc"  selected="@(sort == "price-asc"  ? "selected" : null)"> Giá tăng dần </option>
+                        <option value="price-desc" selected="@(sort == "price-desc" ? "selected" : null)"> Giá giảm dần </option>
+                        <option value="name"       selected="@(sort == "name"       ? "selected" : null)"> Tên A → Z </option>
                     </select>
                 </form>
             </div>
 
 
+
             <!-- PRODUCT LIST -->
             <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-md-3">
 
-                @if (Model?.Any() == true)
+                @if(Model.Any())
                 {
-                    foreach (var d in Model)
+                    foreach(var d in Model)
                     {
                         var img = string.IsNullOrWhiteSpace(d.ImageUrl)
-                            ? Url.Content("~/img/placeholder.jpg")
-                            : d.ImageUrl;
+                            ? Url.Content("~/img/placeholder.jpg") : d.ImageUrl;
 
                         <div class="col">
                             <div class="product-card card h-100 border-0 shadow-sm rounded-4 position-relative">
@@ -94,7 +97,7 @@
                                 @if (d.IsFeatured)
                                 {
                                     <div class="position-absolute top-0 end-0 bg-warning text-dark px-3 py-1 rounded-start-pill fw-bold small">
-                                        ⭐ Hot
+                                        Hot
                                     </div>
                                 }
 
@@ -105,33 +108,31 @@
                                 <div class="card-body">
                                     <h6 class="fw-semibold text-truncate" title="@d.Name">@d.Name</h6>
 
-                                    <!-- Rating -->
                                     @if (d.ReviewsCount > 0)
                                     {
                                         <div class="text-warning small mb-1">
-                                            @for (int i = 1; i <= 5; i++)
+                                            @for(int i = 1; i <= 5; i++)
                                             {
-                                                if (i <= Math.Round(d.Rating))
-                                                {
-                                                    <i class="bi bi-star-fill"></i>
-                                                }
-                                                else
-                                                {
-                                                    <i class="bi bi-star"></i>
-                                                }
+                                                <i class="bi @(i <= Math.Round(d.Rating) ? "bi-star-fill" : "bi-star")"></i>
                                             }
                                             <span class="text-muted ms-1">(@d.ReviewsCount)</span>
                                         </div>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">(Chưa có đánh giá)</small>
                                     }
 
                                     <div class="d-flex justify-content-between mt-2 align-items-center">
                                         <span class="fs-6 text-success fw-bold">@String.Format("{0:N0}đ", d.Price)</span>
 
+                                        <!-- Button không icon -->
                                         <a href="/do-uong/@d.Id" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm">
-                                            👁 Xem
+                                            Xem
                                         </a>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
                     }
@@ -140,11 +141,12 @@
                 {
                     <div class="col text-center">
                         <div class="alert alert-warning rounded-pill px-4">
-                            ❌ Không có sản phẩm phù hợp.
+                            Không có sản phẩm phù hợp.
                         </div>
                     </div>
                 }
             </div>
+
 
 
             <!-- PAGINATION -->
@@ -155,15 +157,16 @@
 
                         <a class="btn btn-outline-primary rounded-pill px-3 @(hasPrev ? "" : "disabled")"
                            href="/do-uong?category=@category&sort=@sort&page=@(pageIndex-1)">
-                            ⬅ Trang trước
+                            Trang trước
                         </a>
 
                         <span class="fw-semibold">Trang <strong>@pageIndex</strong></span>
 
                         <a class="btn btn-outline-primary rounded-pill px-3 @(hasNext ? "" : "disabled")"
                            href="/do-uong?category=@category&sort=@sort&page=@(pageIndex+1)">
-                            Trang sau ➡
+                           Trang sau
                         </a>
+
                     </div>
                 </nav>
             }
