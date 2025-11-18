@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using FreshDrink.Data;
 using FreshDrink.Data.Models;
 using FreshDrink.Data.Identity;
+using FreshDrink.Web.ViewModels;
 
 namespace FreshDrink.Web.Areas.Admin.Controllers
 {
@@ -21,12 +22,21 @@ namespace FreshDrink.Web.Areas.Admin.Controllers
         // LIST ORDERS
         public async Task<IActionResult> Index()
         {
-            var orders = await _db.Orders
+            var ordersRaw = await _db.Orders
                 .Include(o => o.User)
                 .Include(o => o.Items)
-                    .ThenInclude(i => i.Drink)
                 .OrderByDescending(o => o.CreatedAt)
-                .ToListAsync();
+                .ToListAsync();   // <-- EPSON ổn rồi, không còn biểu thức LINQ
+
+            var orders = ordersRaw.Select(o => new OrderSummaryVm
+            {
+                Id = o.Id,
+                CreatedAt = o.CreatedAt,
+                Status = o.Status.ToString(),
+                Total = o.Total,
+                ItemsCount = o.Items.Count,
+                UserName = o.User?.UserName ?? "Không xác định"
+            }).ToList();
 
             return View(orders);
         }
@@ -41,9 +51,26 @@ namespace FreshDrink.Web.Areas.Admin.Controllers
                 .FirstOrDefaultAsync(o => o.Id == id);
 
             if (order == null) return NotFound();
-            return View(order);
-        }
 
+            var vm = new OrderDetailVm
+            {
+                Id = order.Id,
+                CreatedAt = order.CreatedAt,
+                Status = order.Status.ToString(),
+                Total = order.Total,
+                UserName = order.User?.UserName ?? "Không xác định",
+                Items = order.Items?.Select(i => new OrderDetailItemVm
+                {
+                    Name = i.Drink?.Name ?? "Không xác định",
+                    UnitPrice = i.UnitPrice,
+                    Quantity = i.Quantity,
+                    LineTotal = i.UnitPrice * i.Quantity
+                }).ToList() ?? new List<OrderDetailItemVm>()
+            };
+
+            return View(vm);
+        }
+        
         // APPROVE
         [HttpPost]
         [ValidateAntiForgeryToken]

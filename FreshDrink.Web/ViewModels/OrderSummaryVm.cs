@@ -1,3 +1,4 @@
+
 namespace FreshDrink.Web.ViewModels
 {
     public class OrderSummaryVm

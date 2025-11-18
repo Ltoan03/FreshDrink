@@ -1,0 +1,41 @@
+@model FreshDrink.Web.ViewModels.OrderDetailVm
+
+<div class="container mt-4">
+    <h2>Chi tiết đơn hàng #@Model.Id</h2>
+    <hr />
+
+    <p><strong>Người đặt:</strong> @Model.UserName</p>
+    <p><strong>Ngày tạo:</strong> @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+    <p><strong>Trạng thái:</strong> 
+        <span class="badge bg-info">@Model.Status</span>
+    </p>
+    <p><strong>Tổng tiền:</strong> 
+        <span class="fw-bold text-success">@Model.Total.ToString("N0") đ</span>
+    </p>
+
+    <h4 class="mt-4">Danh sách sản phẩm:</h4>
+
+    <table class="table table-bordered mt-2">
+        <thead>
+            <tr>
+                <th>Tên sản phẩm</th>
+                <th>Giá</th>
+                <th>SL</th>
+                <th>Tổng</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model.Items)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.UnitPrice.ToString("N0") đ</td>
+                <td>@item.Quantity</td>
+                <td class="fw-bold text-success">@item.LineTotal.ToString("N0") đ</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <a href="/Admin/AdminOrders" class="btn btn-secondary mt-3">⬅ Quay lại</a>
+</div>

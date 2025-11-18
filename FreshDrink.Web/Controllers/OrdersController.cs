@@ -22,28 +22,21 @@ namespace FreshDrink.Web.Controllers
             _userManager = userManager;
         }
 
-        // ===================== FIX ROUTE =====================
-        public IActionResult MyOrders()
-        {
-            return RedirectToAction(nameof(Index));
-        }
+        // ===================== REDIRECT TO LIST =====================
+        public IActionResult MyOrders() => RedirectToAction(nameof(Index));
 
         // ===================== LIST ORDERS =====================
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
-            var ordersQuery = _db.Orders
+            var orders = await _db.Orders
                 .Include(o => o.User)
                 .Include(o => o.Items)
-                .AsQueryable();
-
-            if (!isAdmin)
-                ordersQuery = ordersQuery.Where(o => o.UserId == userId);
-
-            var orders = await ordersQuery
+                .Where(o => isAdmin || o.UserId == userId)
                 .OrderByDescending(o => o.CreatedAt)
+                .Include(o => o.User)
                 .Select(o => new OrderSummaryVm
                 {
                     Id = o.Id,
@@ -51,7 +44,7 @@ namespace FreshDrink.Web.Controllers
                     Status = o.Status.ToString(),
                     Total = o.Total,
                     ItemsCount = o.Items.Count,
-                   UserName = o.User != null ? o.User.UserName : "Không xác định"
+                    UserName = o.User!.UserName 
                 })
                 .ToListAsync();
 
@@ -61,7 +54,7 @@ namespace FreshDrink.Web.Controllers
         // ===================== DETAILS =====================
         public async Task<IActionResult> Details(int id)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var userId = _userManager.GetUserId(User);
             var isAdmin = User.IsInRole("Admin");
 
             var order = await _db.Orders
@@ -96,14 +89,8 @@ namespace FreshDrink.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Approve(int id)
         {
-            var order = await _db.Orders.FindAsync(id);
-            if (order == null) return NotFound();
-
-            order.Status = OrderStatus.Approved;
-            await _db.SaveChangesAsync();
-
-            TempData["ok"] = $"✔ Đơn hàng #{id} đã duyệt.";
-            return RedirectToAction(nameof(Index));
+            var updated = await UpdateOrderStatus(id, OrderStatus.Approved, $"✔ Đơn hàng #{id} đã duyệt.");
+            return updated;
         }
 
         // ===================== REJECT =====================
@@ -111,13 +98,20 @@ namespace FreshDrink.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Reject(int id)
         {
-            var order = await _db.Orders.FindAsync(id);
-            if (order == null) return NotFound();
+            var updated = await UpdateOrderStatus(id, OrderStatus.Rejected, $"⚠ Đơn hàng #{id} đã bị từ chối.");
+            return updated;
+        }
 
-            order.Status = OrderStatus.Rejected;
+        private async Task<IActionResult> UpdateOrderStatus(int id, OrderStatus status, string message)
+        {
+            var order = await _db.Orders.FindAsync(id);
+            if (order == null)
+                return NotFound();
+
+            order.Status = status;
             await _db.SaveChangesAsync();
 
-            TempData["ok"] = $"⚠ Đơn hàng #{id} đã bị từ chối.";
+            TempData["ok"] = message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -126,14 +120,14 @@ namespace FreshDrink.Web.Controllers
         [HttpPost, ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var order = await _db.Orders
-                .Include(o => o.Items)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            var order = await _db.Orders.Include(o => o.Items).FirstOrDefaultAsync(o => o.Id == id);
 
-            if (order == null) return NotFound();
+            if (order == null)
+                return NotFound();
 
             _db.OrderItems.RemoveRange(order.Items);
             _db.Orders.Remove(order);
+
             await _db.SaveChangesAsync();
 
             TempData["ok"] = $"🗑 Đã xóa đơn hàng #{id}.";

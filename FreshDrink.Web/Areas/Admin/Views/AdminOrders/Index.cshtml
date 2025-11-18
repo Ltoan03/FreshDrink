@@ -1,79 +1,90 @@
-@model IEnumerable<Order>
+@model IEnumerable<FreshDrink.Web.ViewModels.OrderSummaryVm>
 
-<h2 class="mb-3">📦 Danh sách đơn hàng</h2>
-
-<table class="table table-bordered table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th class="text-center">ID</th>
-            <th>Người đặt</th>
-            <th class="text-end">Tổng tiền</th>
-            <th class="text-center">Trạng thái</th>
-            <th class="text-center" style="width:200px">Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var order in Model)
-        {
-            <tr>
-                <td class="text-center fw-bold">#@order.Id</td>
-                <td>@order.UserId</td>
-                <td class="text-end">@order.Total.ToString("N0") đ</td>
-
-                <td class="text-center">
-                    @switch(order.Status)
-                    {
-                        case OrderStatus.Pending:
-                            <span class="badge bg-warning text-dark">⏳ Chờ duyệt</span>
-                            break;
-                        case OrderStatus.Approved:
-                            <span class="badge bg-success">✔ Đã duyệt</span>
-                            break;
-                        case OrderStatus.Rejected:
-                            <span class="badge bg-danger">❌ Từ chối</span>
-                            break;
-                    }
-                </td>
-
-                <td class="text-center">
-
-                    @if(order.Status == OrderStatus.Pending)
-                    {
-                        <!-- DUYỆT -->
-                        <form asp-area="Admin"
-                              asp-controller="AdminOrders"
-                              asp-action="Approve"
-                              asp-route-id="@order.Id"
-                              method="post"
-                              class="d-inline">
-                            <button class="btn btn-success btn-sm me-1">✔ Duyệt</button>
-                        </form>
-
-                        <!-- TỪ CHỐI -->
-                        <form asp-area="Admin"
-                              asp-controller="AdminOrders"
-                              asp-action="Reject"
-                              asp-route-id="@order.Id"
-                              method="post"
-                              class="d-inline"
-                              onsubmit="return confirm('Bạn có chắc muốn từ chối đơn này không?');">
-                            <button class="btn btn-danger btn-sm">❌ Từ chối</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <span class="text-muted fst-italic">Không khả dụng</span>
-                    }
-
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-warning mt-3">
-        🚫 Hiện chưa có đơn hàng nào.
-    </div>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
 }
+
+<div class="container py-4">
+    <h3 class="fw-bold mb-4">
+        <i class="bi bi-receipt"></i> Quản lý đơn hàng
+    </h3>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-warning text-center p-4 rounded-3 shadow-sm">
+            <i class="bi bi-inbox fs-3 text-secondary"></i>
+            <div class="mt-2">Chưa có đơn hàng nào.</div>
+        </div>
+    }
+    else
+    {
+        <table class="table table-bordered table-hover text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Người đặt</th>
+                    <th>Tổng</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var o in Model)
+                {
+                    string color = o.Status switch
+                    {
+                        "Pending" => "warning text-dark",
+                        "Approved" => "success",
+                        "Rejected" => "danger",
+                        _ => "secondary"
+                    };
+
+                    <tr>
+                        <td class="fw-bold">#@o.Id</td>
+                        <td>@o.UserName</td>
+                        <td>@o.Total.ToString("N0") đ</td>
+
+                        <td><span class="badge bg-@color px-3 py-2 rounded-pill">@o.Status</span></td>
+
+                        <td>@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+
+                        <td>
+                            <div class="d-flex justify-content-center gap-2">
+                                <a asp-action="Details" asp-route-id="@o.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                @if (o.Status == "Pending")
+                                {
+                                    <form asp-action="Approve" method="post">
+                                        <input type="hidden" name="id" value="@o.Id" />
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+
+                                    <form asp-action="Reject" method="post">
+                                        <input type="hidden" name="id" value="@o.Id" />
+                                        <button class="btn btn-warning btn-sm">
+                                            <i class="bi bi-x-lg"></i>
+                                        </button>
+                                    </form>
+                                }
+
+                                <form asp-action="Delete" method="post"
+                                      onsubmit="return confirm('Xóa đơn #@o.Id?');">
+                                    <input type="hidden" name="id" value="@o.Id" />
+                                    <button class="btn btn-danger btn-sm">
+                                        <i class="bi bi-trash3"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

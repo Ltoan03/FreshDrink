@@ -1,27 +1,107 @@
-@model IEnumerable<FreshDrink.Data.Models.Order>
+@model IEnumerable<FreshDrink.Web.ViewModels.OrderSummaryVm>
 
-<h2>📦 Quản lý đơn hàng</h2>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Người đặt</th>
-            <th>Ngày tạo</th>
-            <th>Trạng thái</th>
-            <th>Tổng</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var o in Model)
+<div class="container py-4">
+
+    <h3 class="fw-bold mb-4">
+        <i class="bi bi-receipt"></i> Quản lý đơn hàng
+    </h3>
+
+    @if (!Model.Any())
     {
-        <tr>
-            <td>@o.Id</td>
-            <td>@o.User?.UserName</td>
-            <td>@o.CreatedAt</td>
-            <td>@o.Status</td>
-            <td>@o.Total.ToString("C")</td>
-        </tr>
+        <div class="alert alert-warning text-center p-4 rounded-3 shadow-sm">
+            <i class="bi bi-inbox fs-3 text-secondary"></i>
+            <div class="mt-2">Chưa có đơn hàng nào.</div>
+        </div>
     }
-    </tbody>
-</table>
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle text-center bg-white rounded overflow-hidden">
+
+                <thead class="table-dark text-white">
+                    <tr>
+                        <th>#</th>
+                        <th>Người đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var o in Model)
+                    {
+                        string color = o.Status switch
+                        {
+                            "Pending" => "warning text-dark",
+                            "Approved" => "success",
+                            "Rejected" => "danger",
+                            _ => "secondary"
+                        };
+
+                        <tr>
+                            <td class="fw-bold">#@o.Id</td>
+                            <td>@o.UserName</td>
+                            <td class="fw-semibold">@o.Total.ToString("N0") đ</td>
+
+                            <td>
+                                <span class="badge bg-@color rounded-pill px-3 py-2">@o.Status</span>
+                            </td>
+
+                            <td>@o.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+
+                            <td>
+                                <div class="d-flex justify-content-center gap-2">
+
+                                    <!-- Xem -->
+                                    <a asp-area="Admin" asp-controller="AdminOrders" asp-action="Details" asp-route-id="@o.Id"
+                                   class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+
+                                    @if (o.Status == "Pending")
+                                    {
+                                        <!-- ✔ DUYỆT -->
+                                        <form asp-area="Admin" asp-controller="AdminOrders" asp-action="Approve" method="post" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@o.Id" />
+                                            <button class="btn btn-success btn-sm rounded-pill px-3" title="Duyệt đơn">
+                                                <i class="bi bi-check-lg"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- ❌ TỪ CHỐI -->
+                                        <form asp-area="Admin" asp-controller="AdminOrders" asp-action="Reject" method="post" class="d-inline"
+                                              onsubmit="return confirm('Bạn có chắc muốn từ chối đơn #@o.Id?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@o.Id" />
+                                            <button class="btn btn-warning btn-sm rounded-pill px-3" title="Từ chối đơn">
+                                                <i class="bi bi-x-lg"></i>
+                                            </button>
+                                        </form>
+                                    }
+
+                                    <!-- 🗑 XÓA -->
+                                    <form asp-area="Admin" asp-controller="AdminOrders" asp-action="Delete" method="post" class="d-inline"
+                                          onsubmit="return confirm('Bạn chắc chắn muốn xóa đơn #@o.Id?');">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@o.Id" />
+                                        <button class="btn btn-outline-danger btn-sm rounded-pill px-3" title="Xóa đơn">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

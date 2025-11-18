@@ -348,3 +348,29 @@ body {
     .detail-img { height: 260px; }
     .price-box .price { font-size: 26px; }
 }
+.drink-card {
+    transition: transform .15s ease, box-shadow .2s;
+}
+
+.drink-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.card-title {
+    font-weight: 600;
+}
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.card {
+    border-radius: 10px;
+}
+.table-hover tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.badge {
+    font-size: 0.75rem;
+}

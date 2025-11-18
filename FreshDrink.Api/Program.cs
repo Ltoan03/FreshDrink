@@ -1,9 +1,19 @@
 using Microsoft.EntityFrameworkCore;
-using FreshDrink.Api.Data;
+using FreshDrink.Data;
+using FreshDrink.Web.Data;
+using FreshDrink.Data.Identity;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddDbContext<AppDbContext>(opt =>
+
+// Register DbContext
+builder.Services.AddDbContext<FreshDrinkDbContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Register Identity
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<FreshDrinkDbContext>()
+    .AddDefaultTokenProviders();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -18,6 +28,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseAuthentication();   // IMPORTANT
 app.UseAuthorization();
 app.MapControllers();
+
+// Run Seeder
+await DataSeeder.SeedAsync(app);
+
 app.Run();

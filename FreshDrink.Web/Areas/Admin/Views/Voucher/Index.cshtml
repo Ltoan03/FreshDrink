@@ -1,15 +1,15 @@
 @model IEnumerable<FreshDrink.Data.Models.Voucher>
 
-<h2 class="mb-3">🎟 Danh sách Voucher</h2>
+<h2 class="mb-3">Danh sách Voucher</h2>
 
 <a class="btn btn-primary mb-3" asp-action="Create">
-    ➕ Thêm voucher
+    <i class="bi bi-plus-circle"></i> Thêm voucher
 </a>
 
 @if (!Model.Any())
 {
     <div class="alert alert-warning text-center">
-        ⚠ Hiện chưa có voucher nào!
+        <i class="bi bi-info-circle"></i> Hiện chưa có voucher nào!
     </div>
 }
 else
@@ -23,7 +23,7 @@ else
                 <th>Giảm tối đa</th>
                 <th>Hạn sử dụng</th>
                 <th>Trạng thái</th>
-                <th width="120"></th>
+                <th width="120" class="text-center">Thao tác</th>
             </tr>
         </thead>
         <tbody>
@@ -31,33 +31,39 @@ else
         {
             <tr>
                 <td>@v.Id</td>
-                <td class="fw-bold">@v.Code</td>
+                <td class="fw-semibold">@v.Code</td>
                 <td>@v.Discount %</td>
                 <td>@v.MaxDiscountAmount.ToString("N0") ₫</td>
                 <td>@v.ExpiryDate.ToString("dd/MM/yyyy")</td>
+
                 <td>
                     @if (v.IsActive)
                     {
-                        <span class="badge bg-success">✔ Active</span>
+                        <span class="badge bg-success">
+                            <i class="bi bi-check-circle"></i> Active
+                        </span>
                     }
                     else
                     {
-                        <span class="badge bg-danger">❌ Inactive</span>
+                        <span class="badge bg-danger">
+                            <i class="bi bi-x-circle"></i> Inactive
+                        </span>
                     }
                 </td>
-                <td>
-    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-warning btn-sm">
-        ✏ Sửa
-    </a>
 
-    <form asp-action="Delete" asp-route-id="@v.Id"
-          method="post"
-          style="display:inline-block"
-          onsubmit="return confirm('Bạn chắc chắn muốn xóa voucher này?');">
-        <button class="btn btn-danger btn-sm">🗑 Xóa</button>
-    </form>
-</td>
+                <td class="text-center">
+                    <a asp-action="Edit" asp-route-id="@v.Id" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil"></i>
+                    </a>
 
+                    <form asp-action="Delete" asp-route-id="@v.Id" method="post"
+                          style="display:inline-block"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa voucher này?');">
+                        <button class="btn btn-danger btn-sm">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                </td>
             </tr>
         }
         </tbody>
